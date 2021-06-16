@@ -31,7 +31,8 @@ do
 	do	       
 		title_count=`exiftool "${FILENAME}" | grep Title | wc -l`
 		if [ $title_count = "0" ];then
-			title=${FILENAME%%.${EXT}}
+			title=`basename "${FILENAME}"`
+			title=${title%%.${EXT}}
 			echo "${FILENAME} title:${title}"
 			exiftool "${FILENAME}" -title="${title}" || continue
 			rm "${FILENAME}"_original
