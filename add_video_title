@@ -11,13 +11,12 @@ if [ ${_pcnt} -gt 1 ]; then
 fi
 
 ##
-if [ $# -ne 1 ] ; then
+if [ $# -eq 0 ] ; then
 	echo "Usage : ${CMDNAME} [directry] "
 	exit 1
 fi
 
-TARGET_DIR=$1
-
+TARGET_DIR_LIST=(${@// /})
 ##
 EXTLIST=(
 "mp4"
@@ -25,17 +24,22 @@ EXTLIST=(
 )
 
 ##
-for EXT in ${EXTLIST[@]}
+for TARGET_DIR in ${TARGET_DIR_LIST[@]}
 do
-	for FILENAME in `find "${TARGET_DIR}" -name "*.${EXT}" | sort`
-	do	       
-		title_count=`exiftool "${FILENAME}" | grep Title | wc -l`
-		if [ $title_count = "0" ];then
-			title=`basename "${FILENAME}"`
-			title=${title%%.${EXT}}
-			echo "${FILENAME} title:${title}"
-			exiftool "${FILENAME}" -title="${title}" || continue
-			rm "${FILENAME}"_original
-		fi 
+	for EXT in ${EXTLIST[@]}
+	do
+		echo ${TARGET_DIR} ${EXT}
+		for FILENAME in `find "${TARGET_DIR}" -name "*.${EXT}" | sort`
+		do	       
+			title_count=`exiftool "${FILENAME}" | grep Title | wc -l`
+			if [ $title_count = "0" ] ;then
+				title=`basename "${FILENAME}"`
+				title=${title%%.${EXT}}
+				echo "${FILENAME} title:${title}"
+				exiftool "${FILENAME}" -title="${title}" || continue
+				rm "${FILENAME}"_original
+			fi 
+		done
 	done
 done
+
