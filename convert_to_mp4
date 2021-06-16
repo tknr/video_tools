@@ -1,0 +1,90 @@
+#!/bin/bash
+export IFS=$'\n'
+DATE=`date +%Y_%m_%d`
+
+argv=("$@")
+CMDNAME=`basename $0`
+
+## https://qiita.com/hit/items/e95298f689a1ee70ae4a                                                                                                                                                               
+_pcnt=`pgrep -fo ${CMDNAME} | wc -l`               
+if [ ${_pcnt} -gt 1 ]; then                        
+	echo "This script has been running now. proc : ${_pcnt}"
+	exit 1                                           
+fi
+
+##
+NICE=19
+THREADS=$(( (`cat /proc/cpuinfo | grep processor | wc -l` +1) / 4))
+PRESET_V=veryfast
+AUDIO_BITRATE=192k
+TARGET_DIR="."
+
+
+##
+if [ $# -eq 0 ]; then
+    echo "Usage : ${CMDNAME} [-n nicevalue] [-t thread count] [-p video preset value] [-b audio bitrate] [-d dirname]"
+    exit 1
+fi
+
+## https://qiita.com/b4b4r07/items/dcd6be0bb9c9185475bb#%E3%81%84%E3%81%A3%E3%81%9D%E8%87%AA%E5%89%8D%E3%81%A7%E8%A7%A3%E6%9E%90%E3%81%97%E3%81%A1%E3%82%83%E3%81%86
+for OPT in "$@"
+do
+        case "$OPT" in
+                '-n'|'--nice')
+                        NICE=$2
+			shift 2
+                ;;
+                '-t'|'--threads')
+                        THREADS=$2
+			shift 2
+                ;;
+                '-p'|'--preset')
+                        PRESET_V=$2
+			shift 2
+                ;;
+                '-b'|'--bitrate')
+                        AUDIO_BITRATE=$2
+			shift 2
+                ;;
+		'-d'|'--dir')
+			TARGET_DIR=$2
+			shift 2
+		;;
+        esac
+done
+
+##
+EXTLIST=`cat /etc/mime.types | grep -v "#" | grep video | grep -v mp4 | grep -v mkv | grep -v avi | tr "\t" " " | tr -s " " | cut -d " " -f 2 | grep -v "/" | sort | uniq`
+EXTLIST+=(
+"mov"
+"avi.mp4"
+"wmv.mp4"
+"flv.mp4"
+"mpeg"
+"mpg"
+"flv"
+"rmvb"
+"wmv"
+"m4a"
+"avi"
+"AVI"
+"MPG"
+"MPEG"
+"ts"
+"TS"
+"webm"
+)
+EXTLIST+=($(echo "${EXTLIST[*]^^}" ))
+EXTLIST=($(echo "${EXTLIST[*]}" | sort | uniq))
+
+##
+for EXT in ${EXTLIST[@]}
+do
+	for FILENAME in `find "${TARGET_DIR}" -name "*.${EXT}" | sort`
+	do
+		ls -l "${FILENAME}"
+		nice -n ${NICE} ffmpeg -hide_banner -y -i "${FILENAME}" -movflags +faststart -pix_fmt yuv420p -codec:v libx264 -vf pad="width=ceil(iw/2)*2:height=ceil(ih/2)*2" -preset:v ${PRESET_V} -threads ${THREADS} -acodec aac -b:a ${AUDIO_BITRATE} -aac_coder twoloop "${FILENAME%.${EXT}}.mp4" || continue
+		ls -l "${FILENAME%.${EXT}}.mp4"
+      		rm -f "${FILENAME}"
+	done
+done
