@@ -1,0 +1,64 @@
+#!/bin/bash
+export IFS=$'\n'
+
+CMDNAME=`basename $0`
+
+## https://qiita.com/hit/items/e95298f689a1ee70ae4a                                                                                                                                                               
+_pcnt=`pgrep -fo ${CMDNAME} | wc -l`               
+if [ ${_pcnt} -gt 1 ]; then                        
+	echo "This script has been running now. proc : ${_pcnt}"
+	exit 1                                           
+fi
+
+##
+usage_exit(){
+        echo "Usage : ${CMDNAME} [-f:force write title] [directory]"
+        exit 1
+}
+
+if [ $# -eq 0 ] ; then
+        usage_exit
+fi
+
+FORCE_WRITE_TITLE=false
+
+## http://takuya-1st.hatenablog.jp/entry/2015/12/24/234238
+while getopts "fh" OPT ; do
+        case $OPT in
+                f)
+                        FORCE_WRITE_TITLE=true
+                ;;
+                h)
+                        usage_exit
+                ;;
+        esac
+done
+shift $(($OPTIND - 1))
+
+
+TARGET_DIR_LIST=(${@// /})
+##
+EXTLIST=(
+"mp4"
+)
+
+##
+for TARGET_DIR in ${TARGET_DIR_LIST[@]}
+do
+	for EXT in ${EXTLIST[@]}
+	do
+		echo ${TARGET_DIR} ${EXT}
+		for FILENAME in `find "${TARGET_DIR}" -name "*.${EXT}" | sort`
+		do	       
+			title_count=`exiftool "${FILENAME}" | grep Title | wc -l`
+			if [ $title_count = "0" ] || [ ${FORCE_WRITE_TITLE} = true ] ;then
+				title=`basename "${FILENAME}"`
+				title=${title%%.${EXT}}
+##				echo "file:[${FILENAME}] Title:[${title}]"
+				exiftool -overwrite_original "${FILENAME}" -Title= -progress || continue
+				exiftool -overwrite_original "${FILENAME}" -Title="${title}" -lang ja -progress || continue
+			fi 
+		done
+	done
+done
+
