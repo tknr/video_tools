@@ -32,7 +32,8 @@ do
 		title_count=`exiftool "${FILENAME}" | grep Title | wc -l`
 		if [ $title_count = "0" ];then
 			title=${FILENAME%%.${EXT}}
-			exiftool "${FILENAME}" '-title=${title}'
+			exiftool "${FILENAME}" '-title=${title}' || continue
+			rm "${FILENAME}"_original
 		fi 
 	done
 done
