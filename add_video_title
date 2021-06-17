@@ -20,7 +20,6 @@ TARGET_DIR_LIST=(${@// /})
 ##
 EXTLIST=(
 "mp4"
-"mkv"
 )
 
 ##
