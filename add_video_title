@@ -11,10 +11,30 @@ if [ ${_pcnt} -gt 1 ]; then
 fi
 
 ##
+usage_exit(){
+        echo "Usage : ${CMDNAME} [-f:force write title] [directory]"
+        exit 1
+}
+
 if [ $# -eq 0 ] ; then
-	echo "Usage : ${CMDNAME} [directry] "
-	exit 1
+        usage_exit
 fi
+
+FORCE_WRITE_TITLE=false
+
+## http://takuya-1st.hatenablog.jp/entry/2015/12/24/234238
+while getopts "fh" OPT ; do
+        case $OPT in
+                f)
+                        FORCE_WRITE_TITLE=true
+                ;;
+                h)
+                        usage_exit
+                ;;
+        esac
+done
+shift $(($OPTIND - 1))
+
 
 TARGET_DIR_LIST=(${@// /})
 ##
@@ -31,7 +51,7 @@ do
 		for FILENAME in `find "${TARGET_DIR}" -name "*.${EXT}" | sort`
 		do	       
 			title_count=`exiftool "${FILENAME}" | grep Title | wc -l`
-			if [ $title_count = "0" ] ;then
+			if [ $title_count = "0" ] || [ ${FORCE_WRITE_TITLE} = true ] ;then
 				title=`basename "${FILENAME}"`
 				title=${title%%.${EXT}}
 				echo "${FILENAME} title:${title}"
