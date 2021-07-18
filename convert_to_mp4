@@ -73,6 +73,7 @@ EXTLIST+=(
 "ts"
 "TS"
 "webm"
+"m2ts"
 )
 EXTLIST+=($(echo "${EXTLIST[*]^^}" ))
 EXTLIST=($(echo "${EXTLIST[*]}" | sort | uniq))
