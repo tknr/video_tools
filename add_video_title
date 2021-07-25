@@ -55,7 +55,7 @@ do
 				title=`basename "${FILENAME}"`
 				title=${title%%.${EXT}}
 				echo "${FILENAME} title:${title}"
-				exiftool "${FILENAME}" -title="${title}" || continue
+				exiftool "${FILENAME}" -title="${title}" -lang ja -progress || continue
 				rm "${FILENAME}"_original
 			fi 
 		done
