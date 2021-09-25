@@ -21,37 +21,37 @@ TARGET_DIR="."
 
 
 ##
-if [ $# -eq 0 ]; then
+usage_exit() {
     echo "Usage : ${CMDNAME} [-n nicevalue] [-t thread count] [-p video preset value] [-b audio bitrate] [-d dirname]"
+    exit 1
+}
+
+if [ $# -eq 0 ]; then
+    usage_exit;
     exit 1
 fi
 
-## https://qiita.com/b4b4r07/items/dcd6be0bb9c9185475bb#%E3%81%84%E3%81%A3%E3%81%9D%E8%87%AA%E5%89%8D%E3%81%A7%E8%A7%A3%E6%9E%90%E3%81%97%E3%81%A1%E3%82%83%E3%81%86
-for OPT in "$@"
+while getopts n:t:p:b:d:h OPT
 do
-        case "$OPT" in
-                '-n'|'--nice')
-                        NICE=$2
-			shift 2
-                ;;
-                '-t'|'--threads')
-                        THREADS=$2
-			shift 2
-                ;;
-                '-p'|'--preset')
-                        PRESET_V=$2
-			shift 2
-                ;;
-                '-b'|'--bitrate')
-                        AUDIO_BITRATE=$2
-			shift 2
-                ;;
-		'-d'|'--dir')
-			TARGET_DIR=$2
-			shift 2
+    case $OPT in
+	n) NICE=$OPTARG
 		;;
-        esac
+	t) THREADS=$OPTARG
+		;;
+	p) PRESET_V=$OPTARG
+		;;
+	b) AUDIO_BITRATE=$OPTARG
+		;;
+	d) TARGET_DIR=$OPTARG
+		;;
+        h) usage_exit
+		;;
+        \?) usage_exit
+		;;
+    esac
 done
+shift $(($OPTIND - 1))
+
 
 ##
 EXTLIST=`cat /etc/mime.types | grep -v "#" | grep video | grep -v mp4 | grep -v mkv | grep -v avi | tr "\t" " " | tr -s " " | cut -d " " -f 2 | grep -v "/" | sort | uniq`
