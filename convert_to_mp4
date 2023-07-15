@@ -14,7 +14,7 @@ fi
 
 ##
 NICE=19
-THREADS=$(( (`cat /proc/cpuinfo | grep processor | wc -l` +1) / 4))
+THREADS=$(( (`cat /proc/cpuinfo | grep processor | wc -l` +1) / 2))
 PRESET_V=veryfast
 AUDIO_BITRATE=192k
 TARGET_DIR="."
@@ -73,6 +73,7 @@ EXTLIST+=(
 "TS"
 "webm"
 "m2ts"
+"mkv"
 )
 EXTLIST+=($(echo "${EXTLIST[*]^^}" ))
 EXTLIST=($(echo "${EXTLIST[*]}" | sort | uniq))
