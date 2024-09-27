@@ -15,10 +15,11 @@ fi
 ##
 NICE=19
 TARGET_DIR="."
+CRF=28
 
 ##
 usage_exit() {
-    echo "Usage : ${CMDNAME} [-n nicevalue] [-t thread count] [-p video preset value] [-b audio bitrate] [-d dirname]"
+    echo "Usage : ${CMDNAME} [-n nicevalue] [-c crf value] [-d dirname]"
     exit 1
 }
 
@@ -26,12 +27,14 @@ if [ $# -eq 0 ]; then
     usage_exit
 fi
 
-while getopts n:t:p:b:d:h OPT
+while getopts n:d:c:h OPT
 do
     case $OPT in
 	n) NICE=$OPTARG
 		;;
 	d) TARGET_DIR=$OPTARG
+		;;
+	c) CRF=$OPTARG
 		;;
         h) usage_exit
 		;;
@@ -55,8 +58,9 @@ do
 	for FILENAME in `find "${TARGET_DIR}" -name "*.${EXT}" | sort`
 	do
 		ls -l "${FILENAME}"
-		nice -n ${NICE} ffmpeg -hide_banner -y -i "${FILENAME}" -c:a copy -c:v libx265 -crf 28 -tag:v hvc1 "${FILENAME%.${EXT}}.h265.mp4" || continue
-		ls -l "${FILENAME%.${EXT}}.mp4"
+		nice -n ${NICE} ffmpeg -hide_banner -y -i "${FILENAME}" -c:a copy -c:v libx265 -crf ${CRF} -tag:v hvc1 "${FILENAME%.${EXT}}.h265.mp4" || continue
+		ls -l "${FILENAME%.${EXT}}.h265.mp4"
       		rm -f "${FILENAME}"
+		mv "${FILENAME%.${EXT}}.h265.mp4" "${FILENAME}"
 	done
 done
