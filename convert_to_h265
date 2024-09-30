@@ -16,6 +16,7 @@ fi
 NICE=19
 TARGET_DIR="."
 CRF=28
+THREADS=$(( (`cat /proc/cpuinfo | grep processor | wc -l` +1) / 2))
 
 ##
 usage_exit() {
@@ -27,11 +28,13 @@ if [ $# -eq 0 ]; then
     usage_exit
 fi
 
-while getopts n:d:c:h OPT
+while getopts n:t:d:c:h OPT
 do
     case $OPT in
 	n) NICE=$OPTARG
 		;;
+        t) THREADS=$OPTARG
+                ;;
 	d) TARGET_DIR=$OPTARG
 		;;
 	c) CRF=$OPTARG
@@ -46,8 +49,28 @@ shift $(($OPTIND - 1))
 
 
 ##
-EXTLIST=(
+EXTLIST=`cat /etc/mime.types | grep -v "#" | grep video | grep -v mp4 | grep -v mkv | grep -v avi | tr "\t" " " | tr -s " " | cut -d " " -f 2 | grep -v "/" | sort | uniq`
+EXTLIST+=(
 "mp4"
+"mov"
+"avi.mp4"
+"wmv.mp4"
+"flv.mp4"
+"mpeg"
+"mpg"
+"flv"
+"rmvb"
+"wmv"
+"m4a"
+"avi"
+"AVI"
+"MPG"
+"MPEG"
+"ts"
+"TS"
+"webm"
+"m2ts"
+"mkv"
 )
 EXTLIST+=($(echo "${EXTLIST[*]^^}" ))
 EXTLIST=($(echo "${EXTLIST[*]}" | sort | uniq))
@@ -59,9 +82,9 @@ do
 	do
 		ls -l "${FILENAME}"
 		FILENAME_H265="${FILENAME%.${EXT}}.h265.mp4"
-		nice -n ${NICE} ffmpeg -hide_banner -y -i "${FILENAME}" -c:a copy -c:v libx265 -crf ${CRF} -tag:v hvc1 "${FILENAME_H265}" || continue
+		nice -n ${NICE} ffmpeg -hide_banner -y -i "${FILENAME}" -c:a copy -c:v libx265 -crf ${CRF} -tag:v hvc1  -threads ${THREADS} "${FILENAME_H265}" || continue
 		ls -l "${FILENAME_H265}"
       		rm -f "${FILENAME}"
-		mv "${FILENAME_H265}" "${FILENAME}"
+		mv "${FILENAME_H265}" "${FILENAME%.${EXT}}.mp4"
 	done
 done
