@@ -76,7 +76,7 @@ do
         do
 		WIDTH=`ffprobe -i ${FILENAME} -v error -select_streams v:0 -show_entries stream=width | head -n 2 | tail -n 1 | cut -d "=" -f 2`
 		if [ $(( WIDTH )) -gt 1280 ] ; then
-			BASENAME=${FILE##*/}
+			BASENAME=${FILENAME##*/}
 			nice -n ${NICE} ffmpeg -hide_banner -y -i ${FILENAME} -vf scale=1280:-1  -threads ${THREADS} /tmp/${BASENAME} || exit 1
 			/bin/cp -vf /tmp/${BASENAME} ${FILENAME} || exit 1
 			/bin/rm -vf /tmp/${BASENAME} || exit 1
