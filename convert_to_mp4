@@ -15,7 +15,7 @@ fi
 ##
 NICE=19
 THREADS=$(( (`cat /proc/cpuinfo | grep processor | wc -l` +1) / 2))
-PRESET_V=veryfast
+PRESET_V=fast
 AUDIO_BITRATE=192k
 TARGET_DIR="."
 
