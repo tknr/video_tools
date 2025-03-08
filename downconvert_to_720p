@@ -71,7 +71,10 @@ for EXT in ${EXTLIST[@]}
 do
         for FILENAME in `find "${TARGET_DIR}" -name "*.${EXT}" | sort`
         do
-		WIDTH=`ffprobe -i ${FILENAME} -v error -select_streams v:0 -show_entries stream=width | head -n 2 | tail -n 1 | cut -d "=" -f 2` || continue
+		WIDTH=`ffprobe -i ${FILENAME} -v error -select_streams v:0 -show_entries stream=width | grep -v "\[" | head -n 1 | cut -d "=" -f 2` || continue
+		if [ ${#WIDTH} -eq 0 ]; then
+			continue
+		fi
 		if [[ ! "${WIDTH}" =~ ^[0-9]+$ ]]; then
 			echo ${FILENAME}":"${WIDTH}": not width number."
 			continue
