@@ -71,7 +71,11 @@ for EXT in ${EXTLIST[@]}
 do
         for FILENAME in `find "${TARGET_DIR}" -name "*.${EXT}" | sort`
         do
-		WIDTH=`ffprobe -i ${FILENAME} -v error -select_streams v:0 -show_entries stream=width | head -n 2 | tail -n 1 | cut -d "=" -f 2`
+		WIDTH=`ffprobe -i ${FILENAME} -v error -select_streams v:0 -show_entries stream=width | head -n 2 | tail -n 1 | cut -d "=" -f 2` || continue
+		if [[ ! "${WIDTH}" =~ ^[0-9]+$ ]]; then
+			echo ${FILENAME}":"${WIDTH}": not width number."
+			continue
+		fi
 		if [ $(( WIDTH )) -gt 1280 ] ; then
 			BASENAME=${FILENAME##*/}
 			nice -n ${NICE} ffmpeg -hide_banner -y -i ${FILENAME} -vf scale=1280:-1 -crf 23 -preset fast -maxrate 6M -bufsize 12M /tmp/${BASENAME} || continue
