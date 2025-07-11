@@ -45,8 +45,8 @@ for FILENAME in `find "${TARGET_DIR}" -name "*.mp4" | sort`
 do
 	BASENAME=${FILENAME##*/}
 	nice -n ${NICE} ffmpeg -hide_banner -y -i ${FILENAME} -vcodec libx265 /tmp/${BASENAME} || continue
-	ll ${FILENAME}
-	ll /tmp/${BASENAME} 
-i	/bin/cp -vf /tmp/${BASENAME} ${FILENAME} || continue
+	ls -lh ${FILENAME}
+	ls -lh /tmp/${BASENAME} 
+	/bin/cp -vf /tmp/${BASENAME} ${FILENAME} || continue
 	/bin/rm -vf /tmp/${BASENAME} || continue
 done
