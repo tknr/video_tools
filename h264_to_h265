@@ -1,0 +1,50 @@
+#!/bin/bash
+export IFS=$'\n'
+DATE=`date +%Y_%m_%d`
+
+argv=("$@")
+CMDNAME=`basename $0`
+
+## https://qiita.com/hit/items/e95298f689a1ee70ae4a
+_pcnt=`pgrep -fo ${CMDNAME} | wc -l`
+if [ ${_pcnt} -gt 1 ]; then
+echo "This script has been running now. proc : ${_pcnt}"
+exit 1
+fi
+
+NICE=19
+TARGET_DIR="."
+
+##
+usage_exit() {
+	echo "Usage : ${CMDNAME} [-n nicevalue] [-d dirname]"
+		exit 1
+}
+
+if [ $# -eq 0 ]; then
+usage_exit
+fi
+
+while getopts n:t:p:b:d:h OPT
+do
+	case $OPT in
+		n) NICE=$OPTARG
+			;;
+		d) TARGET_DIR=$OPTARG
+			;;
+		h) usage_exit
+			;;
+		\?) usage_exit
+		;;
+	esac
+done
+
+shift $(($OPTIND - 1))
+
+for FILENAME in `find "${TARGET_DIR}" -name "*.mp4" | sort`
+do
+	BASENAME=${FILENAME##*/}
+	nice -n ${NICE} ffmpeg -hide_banner -y -i ${FILENAME} -vcodec libx265 /tmp/${BASENAME} || continue
+	/bin/cp -vf /tmp/${BASENAME} ${FILENAME} || continue
+	/bin/rm -vf /tmp/${BASENAME} || continue
+done
