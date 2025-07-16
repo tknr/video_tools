@@ -22,7 +22,7 @@ usage_exit() {
 }
 
 if [ $# -eq 0 ]; then
-usage_exit
+	usage_exit
 fi
 
 while getopts n:t:p:b:d:h OPT
@@ -43,6 +43,10 @@ shift $(($OPTIND - 1))
 
 for FILENAME in `find "${TARGET_DIR}" -name "*.mp4" | sort`
 do
+	IS_HEVC=`ffprobe -hide_banner  -i ${FILENAME}  2<&1 | grep -i "hevc" | wc -l`
+	if [ $(( IS_HEVC )) -ne 0 ]; then
+		continue
+	fi
 	BASENAME=${FILENAME##*/}
 	nice -n ${NICE} ffmpeg -hide_banner -y -i ${FILENAME} -vcodec libx265 /tmp/${BASENAME} || continue
 	ls -lh ${FILENAME}
