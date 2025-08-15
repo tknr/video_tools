@@ -48,7 +48,7 @@ do
 		continue
 	fi
 	BASENAME=${FILENAME##*/}
-	nice -n ${NICE} ffmpeg -hide_banner -y -i ${FILENAME}  -movflags +faststart -codec:v libx265 -preset:v veryfast -acodec aac -b:a 192k -aac_coder twoloop /tmp/${BASENAME} || continue
+	nice -n ${NICE} ffmpeg -hide_banner -y -i ${FILENAME} -movflags +faststart -codec:v libx265 -tag:v hvc1 -preset:v medium -acodec aac -b:a 192k -aac_coder twoloop /tmp/${BASENAME} || continue
 	ls -lh ${FILENAME}
 	ls -lh /tmp/${BASENAME} 
 	/bin/cp -vf /tmp/${BASENAME} ${FILENAME} || continue
